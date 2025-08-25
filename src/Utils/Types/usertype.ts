@@ -1,0 +1,8 @@
+export interface UserRow {
+    id: string;
+    clerk_id: string;
+    email: string;
+    full_name: string;
+    created_at: string;
+    updated_at: string;
+  }
