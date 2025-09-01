@@ -35,7 +35,9 @@
     "import-aliases": "^1.0.2",
     "jsonwebtoken": "^9.0.2",
     "multer": "1.4.5-lts.1",
-    "pg": "^8.13.3"
+    "pg": "^8.13.3",
+    "reflect-metadata": "^0.2.2",
+    "typeorm": "^0.3.26"
   },
   "devDependencies": {
     "@types/bcryptjs": "^2.4.6",
@@ -49,6 +51,7 @@
     "@types/pg": "^8.11.11",
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.8.3"
   }
 }

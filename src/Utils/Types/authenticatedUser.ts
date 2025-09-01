@@ -1,7 +1,7 @@
 
 import { Request } from "express";
 export interface AuthenticatedUser{
-    clerkId: string;
+    id: string;
     email: string;
     fullName: string;
     role: string;

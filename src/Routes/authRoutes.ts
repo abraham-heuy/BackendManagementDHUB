@@ -1,10 +1,11 @@
-import express from "express";
-import { loginOrRegisterUser, getProfile } from "@app/Controllers/authController";
-import { validateClerkToken } from "@app/middlewares/auth/validateToken";
+import { Router } from "express";
+import { AuthController } from "@app/Controllers/authController";
 
-const router = express.Router();
+const router = Router();
+const authController = new AuthController();
 
-router.post("/login", validateClerkToken, loginOrRegisterUser);
-router.get("/me", validateClerkToken, getProfile);
+router.post("/register", authController.register);
+router.post("/login", authController.login);
+router.post("/logout", authController.logout);
 
 export default router;

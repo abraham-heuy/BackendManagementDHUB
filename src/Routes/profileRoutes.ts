@@ -1,13 +1,25 @@
-import { createProfile, deleteProfile, getProfileByUserId, updateProfile } from "@app/Controllers/userProfileController";
+import express, { Router } from "express";
+import {StudentProfileController} from "@app/Controllers/userProfileController"
 
-import express from "express"
+export class ProfileRoutes {
+    public router: Router;
+    private profileController: StudentProfileController;
 
+    constructor(){
+        this.router = express.Router();
+        this.profileController = new StudentProfileController();
+        this.initializedRoutes()
+    }
 
-const profile = express.Router()
+    private initializedRoutes(): void{
+        this.router.post("/create", this.profileController.create)
+        this.router.get("/", this.profileController.getAll)
+        this.router.get("/user/:id", this.profileController.getByUserId)
+        this.router.get("/profile/:id", this.profileController.getOne)
+        this.router.get("/me/:id", this.profileController.getMine)
+        this.router.put("/:id", this.profileController.update)
+        this.router.delete("/:id", this.profileController.delete)
+    }
+}
 
-profile.post("/", createProfile);
-profile.get("/:user_id", getProfileByUserId);
-profile.put("/:user_id", updateProfile);
-profile.delete("/:user_id", deleteProfile);
-
-export default profile;
+export default new ProfileRoutes().router

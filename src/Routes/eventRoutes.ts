@@ -1,16 +1,23 @@
-// src/Routes/eventRoutes.ts
-import express from "express";
-import {createEventHandler,getEventsHandler,getEventHandler,updateEventHandler,deleteEventHandler,} from "@app/Controllers/eventController";
+import express, {Router } from "express";
+import {EventController} from "@app/Controllers/eventController"
 
+export class EventRoutes{
+    public router : Router;
+    private eventController: EventController; 
 
-const event = express.Router();
+    constructor(){
+        this.router = express.Router();
+        this.eventController = new EventController();
+        this.initializedRoutes()
+    }
 
+    private initializedRoutes():void{
+        this.router.post("/create", this.eventController.createEvent)
+        this.router.get("/", this.eventController.getEvents)
+        this.router.get("/:id", this.eventController.getEvent)
+        this.router.put("/:id", this.eventController.updateEvent)
+        this.router.delete("/:id", this.eventController.deleteEvent)
+    }
+}
 
-event.post("/", createEventHandler);
-event.get("/", getEventsHandler);
-event.get("/:id", getEventHandler);
-event.put("/:id", updateEventHandler);
-event.delete("/:id", deleteEventHandler);
-
-
-export default event;
+export default new EventRoutes().router;

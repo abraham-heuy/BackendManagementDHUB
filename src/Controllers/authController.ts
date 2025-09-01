@@ -1,51 +1,113 @@
+// src/controllers/AuthController.ts
 import { Request, Response } from "express";
-import { findOrCreateUserByClerkId, getUserWithRoles } from "@app/Models/userModel";
-import asyncHandler from "@app/middlewares/asynchandler/asynchandler";
+import { AppDataSource } from "@app/DB/data-source";
+import { User } from "@app/entity/User";
+import { Role } from "@app/entity/Role";
+import { UserRole } from "@app/entity/UserRole";
+import bcrypt from "bcryptjs";
+import { generateToken } from "@app/Utils/Helpers/generateToken";
 
-export const loginOrRegisterUser = asyncHandler(async (req: Request, res: Response) => {
-  const { clerkId, email, fullName } = req.user!;
+export class AuthController {
+  private userRepository = AppDataSource.getRepository(User);
+  private roleRepository = AppDataSource.getRepository(Role);
+  private userRoleRepository = AppDataSource.getRepository(UserRole);
 
-  // Ensure the user exists in DB
-  const user = await findOrCreateUserByClerkId(clerkId, email, fullName);
+  // Student Registration (role always student)
+  register = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      const { fullName, email, password } = req.body;
 
-  // Fetch roles + permissions for this user
-  const profileWithRoles = await getUserWithRoles(user.id);
+      const existingUser = await this.userRepository.findOne({ where: { email } });
+      if (existingUser) {
+        return res.status(400).json({ message: "User already exists" });
+      }
 
-  res.json({
-    success: true,
-    user: {
-      id: user.id,
-      clerkId: user.clerkId,
-      email: user.email,
-      fullName: user.fullName,
-      roles: profileWithRoles.roles,
-      permissions: profileWithRoles.permissions,
-    },
-  });
-});
+      const hashedPassword = await bcrypt.hash(password, 10);
 
-export const getProfile = asyncHandler(async (req: Request, res: Response) => {
-  const { clerkId } = req.user!;
+      const user = this.userRepository.create({
+        fullName,
+        email,
+        password: hashedPassword,
+      });
 
-  // Ensure the user exists in DB
-  const dbUser = await findOrCreateUserByClerkId(
-    clerkId,
-    req.user!.email,
-    req.user!.fullName
-  );
+      await this.userRepository.save(user);
 
-  // Fetch roles + permissions
-  const profile = await getUserWithRoles(dbUser.id);
+      // Always assign "student" role on registration
+      const studentRole = await this.roleRepository.findOne({ where: { name: "student" } });
+      if (!studentRole) {
+        return res.status(500).json({ message: "Default role 'student' not found in database" });
+      }
 
-  res.json({
-    success: true,
-    user: {
-      id: dbUser.id,
-      clerkId: dbUser.clerkId,
-      email: dbUser.email,
-      fullName: dbUser.fullName,
-      roles: profile.roles,
-      permissions: profile.permissions,
-    },
-  });
-});
+      const userRole = this.userRoleRepository.create({
+        user,
+        role: studentRole,
+      });
+      await this.userRoleRepository.save(userRole);
+
+      // ✅ pass role.name instead of id
+      const tokens = generateToken(res, user.id, studentRole.name);
+
+      return res.status(201).json({
+        message: "User registered successfully",
+        user: {
+          id: user.id,
+          fullName: user.fullName,
+          email: user.email,
+          role: studentRole.name,
+        },
+        ...tokens,
+      });
+    } catch (error) {
+      console.error("Registration error:", error);
+      return res.status(500).json({ message: "Server error" });
+    }
+  };
+
+  // Login (students + admins)
+  login = async (req: Request, res: Response): Promise<Response> => {
+    try {
+      const { email, password } = req.body;
+
+      const user = await this.userRepository.findOne({
+        where: { email },
+        relations: ["userRoles", "userRoles.role"], // fetch roles
+      });
+
+      if (!user) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) {
+        return res.status(401).json({ message: "Invalid email or password" });
+      }
+
+      // For now take the first role (you can extend this later)
+      const role = user.userRoles[0]?.role;
+
+      // ✅ pass role.name (string)
+      const tokens = generateToken(res, user.id, role?.name || "unknown");
+
+      return res.status(200).json({
+        message: "Login successful",
+        user: {
+          id: user.id,
+          fullName: user.fullName,
+          email: user.email,
+          role: role?.name || "unknown",
+        },
+        ...tokens,
+      });
+    } catch (error) {
+      console.error("Login error:", error);
+      return res.status(500).json({ message: "Server error" });
+    }
+  };
+
+  // Logout (clear cookies)
+  logout = async (_req: Request, res: Response): Promise<Response> => {
+    res.clearCookie("access_token");
+    res.clearCookie("refresh_token");
+    return res.status(200).json({ message: "Logged out successfully" });
+  };
+}

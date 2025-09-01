@@ -1,49 +1,60 @@
 import { Request, Response } from "express";
 import asyncHandler from "@app/middlewares/asynchandler/asynchandler";
-import {
-  getAllUsers,
-  getUserById,
-  updateUser,
-  deleteUser,
-} from "@app/Models/userModel";
+import { User } from "@app/entity/User";
+import { AppDataSource } from "@app/DB/data-source"; 
+import { UserRequest } from "@app/Utils/Types/authenticatedUser";
 
-//  Get all users with roles & permissions
-export const fetchUsers = asyncHandler(async (req: Request, res: Response) => {
-  const users = await getAllUsers();
-  res.json({ success: true, users });
-});
+export class UserController {
+  private userRepo = AppDataSource.getRepository(User);
 
-//  Get single user by ID
-export const fetchUserById = asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const user = await getUserById(Number(id));
+  // ✅ Get all users with roles
+  fetchUsers = asyncHandler(async (req: Request, res: Response) => {
+    const users = await this.userRepo.find();
+    res.json({ success: true, users });
+  });
 
-  if (!user) {
-    return res.status(404).json({ success: false, message: "User not found" });
-  }
+  // ✅ Get user by ID
+  fetchUserById = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const user = await this.userRepo.findOne({ where: { id } });
 
-  res.json({ success: true, user });
-});
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
 
-// Update user info (e.g. name, email)
-export const updateUserProfile = asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  const { fullName, email } = req.body;
+    res.json({ success: true, user });
+  });
 
-  const updatedUser = await updateUser(Number(id), fullName, email );
-  res.json({ success: true, user: updatedUser });
-});
+  // ✅ Update user info (name, email)
+  updateUserProfile = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+    const { fullName, email } = req.body;
 
-// Delete user
-export const removeUser = asyncHandler(async (req: Request, res: Response) => {
-  const { id } = req.params;
-  await deleteUser(Number(id));
-  res.json({ success: true, message: "User deleted successfully" });
-});
+    const user = await this.userRepo.findOne({ where: { id } });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
 
-// // ✅ Assign role to user
-// export const addRoleToUser = asyncHandler(async (req: Request, res: Response) => {
-//   const { userId, roleId } = req.body;
-//   const updatedUser = await assignRoleToUser(userId, roleId);
-//   res.json({ success: true, user: updatedUser });
-// });
+    user.fullName = fullName ?? user.fullName;
+    user.email = email ?? user.email;
+
+    const updatedUser = await this.userRepo.save(user);
+
+    res.json({ success: true, user: updatedUser });
+  });
+
+  // ✅ Delete user
+  removeUser = asyncHandler(async (req: Request, res: Response) => {
+    const { id } = req.params;
+
+    const user = await this.userRepo.findOne({ where: { id } });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    await this.userRepo.remove(user);
+
+    res.json({ success: true, message: "User deleted successfully" });
+  });
+
+}

@@ -1,6 +1,5 @@
 export interface UserRow {
-    id: string;
-    clerk_id: string;
+    id: string
     email: string;
     full_name: string;
     created_at: string;

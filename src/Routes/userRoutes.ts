@@ -1,11 +1,22 @@
- import { fetchUserById, fetchUsers, removeUser, updateUserProfile } from "@app/Controllers/userController";
-import express from "express"
+import express, { Router } from "express";
+import { UserController } from "@app/Controllers/userController";
 
- const user = express.Router();
- 
- user.get("/", fetchUsers)
- user.get("/:id", fetchUserById)
- user.put("/:id", updateUserProfile)
- user.delete("/:id", removeUser)
+export class UserRoutes {
+    public router: Router;
+    private userController: UserController;
 
- export default user; 
+    constructor() {
+        this.router = express.Router();
+        this.userController = new UserController();
+        this.initializeRoutes();
+    }
+
+    private initializeRoutes(): void {
+        this.router.get("/", this.userController.fetchUsers);
+        this.router.get("/:id", this.userController.fetchUserById);
+        this.router.put("/:id", this.userController.updateUserProfile);
+        this.router.delete("/:id", this.userController.removeUser);
+    }
+}
+
+export default new UserRoutes().router;
