@@ -13,6 +13,8 @@ import cookieParser from "cookie-parser";
 import EventRoutes  from "./Routes/eventRoutes";
 import userRoutes from "./Routes/userRoutes";
 import profileRoutes from "./Routes/profileRoutes";
+import applicationsRoute from "./Routes/applicationsRoute";
+import stagesRoutes from "./Routes/stagesRoutes";
 
 
 // Load environment variables
@@ -28,7 +30,7 @@ app.use(cookieParser());
 // CORS setup
 app.use(
   cors({
-    origin: "*",
+    origin: "http://localhost:5173",
     methods: ["GET", "POST", "PUT", "DELETE"],
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
@@ -39,7 +41,9 @@ app.use(
 app.use("/api/v1/auth", authRoutes);
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/events", EventRoutes);
+app.use("/api/v1/applications", applicationsRoute)
 app.use("/api/v1/profile", profileRoutes);
+app.use("/api/v1/stages", stagesRoutes)
 
 // Test route
 app.get("/", (req, res) => {

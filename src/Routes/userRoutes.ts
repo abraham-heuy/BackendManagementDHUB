@@ -14,7 +14,7 @@ export class UserRoutes {
     private initializeRoutes(): void {
         this.router.get("/", this.userController.fetchUsers);
         this.router.get("/:id", this.userController.fetchUserById);
-        this.router.put("/:id", this.userController.updateUserProfile);
+        this.router.put("/:id", this.userController.updateUser);
         this.router.delete("/:id", this.userController.removeUser);
     }
 }

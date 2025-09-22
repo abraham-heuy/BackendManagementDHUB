@@ -2,7 +2,6 @@ import "reflect-metadata"
 import { DataSource } from "typeorm"
 import dotenv from "dotenv"
 import { User } from "@app/entity/User"
-import { UserRole } from "@app/entity/UserRole"
 import { EventApplication } from "@app/entity/EventApplication"
 import { StudentProfile } from "@app/entity/StudentProfile"
 import { ProgressLog } from "@app/entity/ProcessLog"
@@ -23,7 +22,6 @@ export const AppDataSource = new DataSource({
     database: process.env.DB_NAME,
     entities: [User,
         Role,
-        UserRole,
         EventApplication,
         StudentProfile,
         ProgressLog,
@@ -31,8 +29,10 @@ export const AppDataSource = new DataSource({
         Event,
         Notification,
         RolePermission,
-        Permission],
-    synchronize: true,
+        Permission,
+        ],
+    migrations: ["src/migrations/*.ts"],
+    synchronize: false,
     logging: false,
 })
 

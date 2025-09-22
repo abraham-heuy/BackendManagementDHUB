@@ -1,4 +1,3 @@
-//the user entity for auth: 
 // src/entities/User.ts
 import {
   Entity,
@@ -6,16 +5,18 @@ import {
   Column,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
   OneToMany,
-  OneToOne
+  OneToOne,
+  JoinColumn,
 } from "typeorm";
-import { UserRole } from "@app/entity/UserRole";
-import { EventApplication } from "@app/entity/EventApplication";
+import { Role } from "@app/entity/Role";
 import { StudentProfile } from "@app/entity/StudentProfile";
-import { ProgressLog } from "@app/entity/ProcessLog";
 import { MentorAllocation } from "@app/entity/MentorAllocation";
 import { Event } from "@app/entity/Event";
 import { Notification } from "@app/entity/Notifications";
+import { Stage } from "./stage";
+import { ProgressLog } from "./ProcessLog";
 
 @Entity("users")
 export class User {
@@ -31,21 +32,32 @@ export class User {
   @Column()
   fullName!: string;
 
+  // Optional for students only
+  @Column({ nullable: true })
+  regNumber?: string;
+
+  // Stage field for students
+  @Column({
+    type: "enum",
+    enum: Stage,
+    nullable: true, // Admins/mentors don’t need a stage
+  })
+  stage?: Stage;
+
+  // Foreign key to Role
+  @ManyToOne(() => Role, (role) => role.users, { eager: true })
+  @JoinColumn({ name: "role_id" })
+  role!: Role;
+
   @CreateDateColumn()
   created_at!: Date;
 
   @UpdateDateColumn()
   updated_at!: Date;
 
-  @OneToMany(() => UserRole, (userRole) => userRole.user)
-  userRoles!: UserRole[];
-
+  // Relations
   @OneToMany(() => Event, (event) => event.createdBy)
   createdEvents!: Event[];
-  
-
-  @OneToMany(() => EventApplication, (application) => application.student)
-  applications!: EventApplication[];
 
   @OneToOne(() => StudentProfile, (profile) => profile.user)
   profile!: StudentProfile;
@@ -61,5 +73,4 @@ export class User {
 
   @OneToMany(() => Notification, (notification) => notification.user)
   notifications!: Notification[];
-
 }

@@ -1,13 +1,14 @@
 
 import { Request } from "express";
+import { Role } from "./roleType";
 export interface AuthenticatedUser{
     id: string;
     email: string;
     fullName: string;
     role: string;
-    permissions: string[];
 
 }
+
 
 export interface UserRequest extends Request{
     user?:AuthenticatedUser;

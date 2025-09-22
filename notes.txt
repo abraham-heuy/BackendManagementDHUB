@@ -1,0 +1,15 @@
+### Backend Logic ###
+
+#1. Admin is the one that registers a user after screening and after the event. 
+#2. Admin has a default entry in the database, which he/she can change from the database, 
+#3. The student then navigates to the sign in where there is an option to forget password, then reset the password based
+on default details in the database, then update the profile. 
+
+All can apply for events, even when not registered in the database, apply events by id,
+then the applicants are vetted and then the ones that make it are shortlisted and a lis is generated. 
+The students after the event, the ideas that are approved now are entered into the system by the admin. 
+
+so.....
+Apply event => screening => attend event => if approved and pass then => Admin creates the student profile 
+   => assign alo the role and stage by default => sudent navigates to login then resets credentils to login => 
+   updates the profile and track the progress

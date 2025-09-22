@@ -9,7 +9,7 @@ import { UserRequest } from "@app/Utils/Types/authenticatedUser";
 export class StudentProfileController {
   private profileRepo = AppDataSource.getRepository(StudentProfile);
   private userRepo = AppDataSource.getRepository(User);
-
+    
   // Create profile - authenticated student creates their own profile
   create = asyncHandler(async (req: UserRequest, res: Response) => {
     if (!req.user) return res.status(401).json({ message: "Unauthorized" });

@@ -5,7 +5,10 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "serve": "nodemon src/server.ts"
+    "serve": "nodemon src/server.ts",
+    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d ./src/DB/data-source.ts",
+    "migration:generate": "npm run typeorm -- migration:generate ./src/migrations/AutoMigration",
+    "migration:run": "npm run typeorm -- migration:run"
   },
   "repository": {
     "type": "git",
@@ -52,6 +55,6 @@
     "nodemon": "^3.1.10",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
-    "typescript": "^5.8.3"
+    "typescript": "^5.9.2"
   }
 }
