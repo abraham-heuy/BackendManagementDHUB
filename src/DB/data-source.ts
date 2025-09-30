@@ -11,6 +11,10 @@ import { Notification } from "@app/entity/Notifications"
 import { Role } from "@app/entity/Role"
 import { RolePermission } from "@app/entity/RolePermissions"
 import { Permission } from "@app/entity/Permissions"
+import { StudentActivity } from "@app/entity/StudentActivity"
+import { StudentStage } from "@app/entity/StudentStage"
+import { StageActivity } from "@app/entity/StageActivity"
+import { NotificationGroup } from "@app/entity/NotificationGroup"
 dotenv.config()
 
 export const AppDataSource = new DataSource({
@@ -30,7 +34,11 @@ export const AppDataSource = new DataSource({
         Notification,
         RolePermission,
         Permission,
-        ],
+        StudentActivity,
+        StudentStage,
+        StageActivity,
+        NotificationGroup
+    ],
     migrations: ["src/migrations/*.ts"],
     synchronize: false,
     logging: false,

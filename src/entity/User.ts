@@ -1,4 +1,3 @@
-// src/entities/User.ts
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -10,13 +9,15 @@ import {
   OneToOne,
   JoinColumn,
 } from "typeorm";
-import { Role } from "@app/entity/Role";
-import { StudentProfile } from "@app/entity/StudentProfile";
-import { MentorAllocation } from "@app/entity/MentorAllocation";
-import { Event } from "@app/entity/Event";
-import { Notification } from "@app/entity/Notifications";
+import { Role } from "./Role";
+import { StudentProfile } from "./StudentProfile";
+import { MentorAllocation } from "./MentorAllocation";
+import { Event } from "./Event";
+import { EventApplication } from "./EventApplication";
 import { Stage } from "./stage";
 import { ProgressLog } from "./ProcessLog";
+import { StudentStage } from "./StudentStage";
+import { Notification } from "./Notifications";
 
 @Entity("users")
 export class User {
@@ -32,22 +33,22 @@ export class User {
   @Column()
   fullName!: string;
 
-  // Optional for students only
   @Column({ nullable: true })
   regNumber?: string;
 
-  // Stage field for students
+  // default to PRE_INCUBATION for new students; nullable so admins/mentors can omit
   @Column({
     type: "enum",
     enum: Stage,
-    nullable: true, // Admins/mentors don’t need a stage
+    nullable: true,
+    default: Stage.PRE_INCUBATION,
   })
-  stage?: Stage;
+  stage?: Stage | null;
 
-  // Foreign key to Role
-  @ManyToOne(() => Role, (role) => role.users, { eager: true })
+  // Role FK (admin, student, mentor, etc.)
+  @ManyToOne(() => Role, (role) => role.users, { eager: true, nullable: true })
   @JoinColumn({ name: "role_id" })
-  role!: Role;
+  role?: Role | null;
 
   @CreateDateColumn()
   created_at!: Date;
@@ -59,18 +60,26 @@ export class User {
   @OneToMany(() => Event, (event) => event.createdBy)
   createdEvents!: Event[];
 
+  // Optional: applications by registered users (event applications can also be anonymous)
+  @OneToMany(() => EventApplication, (app) => app.student)
+  applications!: EventApplication[];
+
   @OneToOne(() => StudentProfile, (profile) => profile.user)
   profile!: StudentProfile;
 
   @OneToMany(() => ProgressLog, (log) => log.student)
   progressLogs!: ProgressLog[];
 
-  @OneToMany(() => MentorAllocation, (allocation) => allocation.student)
+  @OneToMany(() => MentorAllocation, (alloc) => alloc.student)
   mentorAllocationsAsStudent!: MentorAllocation[];
 
-  @OneToMany(() => MentorAllocation, (allocation) => allocation.mentor)
+  @OneToMany(() => MentorAllocation, (alloc) => alloc.mentor)
   mentorAllocationsAsMentor!: MentorAllocation[];
 
-  @OneToMany(() => Notification, (notification) => notification.user)
+  // Student-stage instances (history / current)
+  @OneToMany(() => StudentStage, (ss) => ss.student)
+  studentStages!: StudentStage[];
+
+  @OneToMany(() => Notification, (notif) => notif.user)
   notifications!: Notification[];
 }

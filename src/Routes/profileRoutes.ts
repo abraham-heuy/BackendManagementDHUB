@@ -1,25 +1,17 @@
-import express, { Router } from "express";
-import {StudentProfileController} from "@app/Controllers/userProfileController"
+// src/routes/studentProfileRoutes.ts
+import { StudentProfileController } from "@app/Controllers/userProfileController";
+import { protect } from "@app/middlewares/RBAC/protect";
+import { Router } from "express";
 
-export class ProfileRoutes {
-    public router: Router;
-    private profileController: StudentProfileController;
 
-    constructor(){
-        this.router = express.Router();
-        this.profileController = new StudentProfileController();
-        this.initializedRoutes()
-    }
+const router = Router();
+const controller = new StudentProfileController();
 
-    private initializedRoutes(): void{
-        this.router.post("/create", this.profileController.create)
-        this.router.get("/", this.profileController.getAll)
-        this.router.get("/user/:id", this.profileController.getByUserId)
-        this.router.get("/profile/:id", this.profileController.getOne)
-        this.router.get("/me/:id", this.profileController.getMine)
-        this.router.put("/:id", this.profileController.update)
-        this.router.delete("/:id", this.profileController.delete)
-    }
-}
+// Student routes
+router.get("/me", protect, controller.getMyProfile);
+router.post("/me", protect, controller.upsertMyProfile);
 
-export default new ProfileRoutes().router
+// Admin/Mentor routes
+router.get("/:userId", protect, controller.getProfileByUserId);
+
+export default router;

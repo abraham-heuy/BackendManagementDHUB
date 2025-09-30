@@ -6,9 +6,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "serve": "nodemon src/server.ts",
-    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d ./src/DB/data-source.ts",
-    "migration:generate": "npm run typeorm -- migration:generate ./src/migrations/AutoMigration",
-    "migration:run": "npm run typeorm -- migration:run"
+    "typeorm": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
+    "migration:generate": "npm run typeorm -- migration:generate -d ./src/DB/data-source.ts",
+    "migration:run": "npm run typeorm -- migration:run -d ./src/DB/data-source.ts",
+    "migration:revert": "npm run typeorm -- migration:revert -d ./src/DB/data-source.ts"
   },
   "repository": {
     "type": "git",

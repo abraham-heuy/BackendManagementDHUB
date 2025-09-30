@@ -1,6 +1,5 @@
 
 import { Request } from "express";
-import { Role } from "./roleType";
 export interface AuthenticatedUser{
     id: string;
     email: string;

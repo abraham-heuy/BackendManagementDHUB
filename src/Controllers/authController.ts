@@ -106,7 +106,8 @@ register = async (req: Request, res: Response): Promise<Response> => {
   // ✅ Get logged-in user
   getMe = async (req: UserRequest, res: Response) => {
     if (!req.user) {
-      return res.status(401).json({ message: "Not authorized" });
+      res.status(401).json({ message: "Not authorized" });
+      return 
     }
 
     res.status(200).json({

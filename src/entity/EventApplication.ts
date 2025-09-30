@@ -7,6 +7,7 @@ import {
   CreateDateColumn,
 } from "typeorm";
 import { Event } from "./Event";
+import { User } from "./User";
 
 @Entity("event_applications")
 export class EventApplication {
@@ -46,10 +47,18 @@ export class EventApplication {
   @Column({ default: false })
   isPassed!: boolean; // ✅ admin later marks pass/fail
 
+  // relation to Event
   @ManyToOne(() => Event, (event) => event.applications, {
     onDelete: "CASCADE",
   })
   event!: Event;
+
+  // ✅ relation to Student (User with role=student)
+  @ManyToOne(() => User, (user) => user.applications, {
+    onDelete: "CASCADE",
+    nullable: true, // allow manual/anonymous applications if needed
+  })
+  student!: User | null;
 
   @CreateDateColumn()
   appliedAt!: Date;

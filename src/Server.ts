@@ -14,7 +14,10 @@ import EventRoutes  from "./Routes/eventRoutes";
 import userRoutes from "./Routes/userRoutes";
 import profileRoutes from "./Routes/profileRoutes";
 import applicationsRoute from "./Routes/applicationsRoute";
-import stagesRoutes from "./Routes/stagesRoutes";
+import studentStageRoutes from "./Routes/studentStageRoutes";
+import studentActivityRoutes from "./Routes/studentActivityRoutes";
+import progressLogRoutes from "./Routes/progressLogRoutes";
+import notificationRoutes from "./Routes/notificationRoutes";
 
 
 // Load environment variables
@@ -43,7 +46,10 @@ app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/events", EventRoutes);
 app.use("/api/v1/applications", applicationsRoute)
 app.use("/api/v1/profile", profileRoutes);
-app.use("/api/v1/stages", stagesRoutes)
+app.use("/api/v1/stages", studentStageRoutes)
+app.use("/api/v1/studentActivities", studentActivityRoutes)
+app.use("/api/v1/logs", progressLogRoutes)
+app.use("/api/v1/notifications", notificationRoutes)
 
 // Test route
 app.get("/", (req, res) => {

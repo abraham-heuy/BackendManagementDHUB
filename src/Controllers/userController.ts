@@ -52,16 +52,18 @@ export class UserController {
   // ✅ Update user (admin or self handled by guards)
   updateUser = asyncHandler(async (req: UserRequest, res: Response) => {
     const { id } = req.params;
-    const { fullName, email, password, regNumber, roleName } = req.body;
+    const { fullName, email, password, regNumber, roleId } = req.body;
 
     const user = await this.userRepo.findOne({
       where: { id },
       relations: ["role"],
     });
+
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
     }
 
+    // Update fields
     if (fullName) user.fullName = fullName;
     if (email) user.email = email;
     if (regNumber) user.regNumber = regNumber;
@@ -70,10 +72,11 @@ export class UserController {
       user.password = await bcrypt.hash(password, 10);
     }
 
-    if (roleName) {
-      const role = await this.roleRepo.findOne({ where: { name: roleName } });
+    // ✅ Update role by roleId
+    if (roleId) {
+      const role = await this.roleRepo.findOne({ where: { id: roleId } });
       if (!role) {
-        return res.status(400).json({ success: false, message: "Invalid role name" });
+        return res.status(400).json({ success: false, message: "Invalid role ID" });
       }
       user.role = role;
     }
@@ -92,6 +95,7 @@ export class UserController {
       },
     });
   });
+
 
   // ✅ Delete user
   removeUser = asyncHandler(async (req: UserRequest, res: Response) => {

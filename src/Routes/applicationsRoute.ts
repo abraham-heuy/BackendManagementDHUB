@@ -15,7 +15,7 @@ export class EventApplications {
     private initializedRoutes(): void {
         this.router.post("/:eventId/apply", this.eventApplication.applyToEvent);
         this.router.get("/:eventId/applications", this.eventApplication.getApplicationsForEvent);
-        this.router.put("/applications/:appId/result", this.eventApplication.markApplicationResult);
+        this.router.put("/:appId/result", this.eventApplication.markApplicationResult);
 
     }
 }
