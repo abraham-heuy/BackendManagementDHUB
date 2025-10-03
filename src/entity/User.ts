@@ -18,6 +18,7 @@ import { Stage } from "./stage";
 import { ProgressLog } from "./ProcessLog";
 import { StudentStage } from "./StudentStage";
 import { Notification } from "./Notifications";
+import { MentorProfile } from "./mentorProfile";
 
 @Entity("users")
 export class User {
@@ -75,7 +76,10 @@ export class User {
 
   @OneToMany(() => MentorAllocation, (alloc) => alloc.mentor)
   mentorAllocationsAsMentor!: MentorAllocation[];
-
+  // inside User entity
+  
+  @OneToOne(() => MentorProfile, (profile) => profile.user)
+  mentorProfile!: MentorProfile;
   // Student-stage instances (history / current)
   @OneToMany(() => StudentStage, (ss) => ss.student)
   studentStages!: StudentStage[];

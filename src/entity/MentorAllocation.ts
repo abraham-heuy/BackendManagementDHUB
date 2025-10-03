@@ -1,23 +1,23 @@
-// src/entities/MentorAllocation.ts
+// src/entity/MentorAllocation.ts
 import {
-    Entity, PrimaryGeneratedColumn, ManyToOne,
-    CreateDateColumn, Unique
-  } from "typeorm";
-  import { User } from "@app/entity/User";
-  
-  @Entity("mentor_allocations")
-  @Unique(["student", "mentor"])
-  export class MentorAllocation {
-    @PrimaryGeneratedColumn("uuid")
-    id!: string;
-  
-    @ManyToOne(() => User, (user) => user.mentorAllocationsAsStudent, { onDelete: "CASCADE" })
-    student!: User;
-  
-    @ManyToOne(() => User, (user) => user.mentorAllocationsAsMentor, { onDelete: "CASCADE" })
-    mentor!: User;
-  
-    @CreateDateColumn()
-    allocated_at!: Date;
-  }
-  
+  Entity,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  CreateDateColumn,
+} from "typeorm";
+import { User } from "./User";
+
+@Entity("mentor_allocations")
+export class MentorAllocation {
+  @PrimaryGeneratedColumn("uuid")
+  id!: string;
+
+  @ManyToOne(() => User, (u) => u.mentorAllocationsAsMentor, { onDelete: "CASCADE" })
+  mentor!: User;
+
+  @ManyToOne(() => User, (u) => u.mentorAllocationsAsStudent, { onDelete: "CASCADE" })
+  student!: User;
+
+  @CreateDateColumn()
+  created_at!: Date;
+}

@@ -9,12 +9,11 @@ import { MentorAllocation } from "@app/entity/MentorAllocation"
 import { Event } from "@app/entity/Event"
 import { Notification } from "@app/entity/Notifications"
 import { Role } from "@app/entity/Role"
-import { RolePermission } from "@app/entity/RolePermissions"
-import { Permission } from "@app/entity/Permissions"
 import { StudentActivity } from "@app/entity/StudentActivity"
 import { StudentStage } from "@app/entity/StudentStage"
 import { StageActivity } from "@app/entity/StageActivity"
 import { NotificationGroup } from "@app/entity/NotificationGroup"
+import { MentorProfile } from "@app/entity/mentorProfile"
 dotenv.config()
 
 export const AppDataSource = new DataSource({
@@ -32,12 +31,11 @@ export const AppDataSource = new DataSource({
         MentorAllocation,
         Event,
         Notification,
-        RolePermission,
-        Permission,
         StudentActivity,
         StudentStage,
         StageActivity,
-        NotificationGroup
+        NotificationGroup,
+        MentorProfile
     ],
     migrations: ["src/migrations/*.ts"],
     synchronize: false,

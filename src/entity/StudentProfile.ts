@@ -34,6 +34,10 @@ export class StudentProfile {
   @Column({ nullable: true })
   institution?: string;
 
+  //  column for matching with mentor specialization .. added it for the allocation mapping;{eg, IT, ML, Engineering, Maths}
+  @Column({ nullable: true })
+  field?: string;
+
   @Column({ nullable: true })
   course?: string;
 

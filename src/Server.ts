@@ -19,6 +19,8 @@ import studentActivityRoutes from "./Routes/studentActivityRoutes";
 import progressLogRoutes from "./Routes/progressLogRoutes";
 import notificationRoutes from "./Routes/notificationRoutes";
 import stageActivityRoutes from "./Routes/stageActivityRoutes";
+import { ppid } from "process";
+import mentorRoutes from "./Routes/mentorRoutes";
 
 
 // Load environment variables
@@ -52,6 +54,7 @@ app.use("/api/v1/studentActivities", studentActivityRoutes)
 app.use("/api/v1/logs", progressLogRoutes)
 app.use("/api/v1/notifications", notificationRoutes)
 app.use("/api/v1/activities", stageActivityRoutes)
+app.use("/api/v1/mentors", mentorRoutes)
 
 // Test route
 app.get("/", (req, res) => {

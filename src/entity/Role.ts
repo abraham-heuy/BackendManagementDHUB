@@ -1,7 +1,6 @@
 // src/entities/Role.ts
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
 import { User } from "@app/entity/User";
-import { RolePermission } from "@app/entity/RolePermissions";
 
 @Entity("roles")
 export class Role {
@@ -18,6 +17,5 @@ export class Role {
   @OneToMany(() => User, (user) => user.role)
   users!: User[];
 
-  @OneToMany(() => RolePermission, (rp) => rp.role)
-  rolePermissions!: RolePermission[];
+
 }
