@@ -1,4 +1,6 @@
 import { ApplicationController } from "@app/Controllers/applicationController";
+import { protect } from "@app/middlewares/RBAC/protect";
+import { adminGuard } from "@app/middlewares/RBAC/roleGuard";
 import express, { Router } from "express";
 
 export class EventApplications {
@@ -13,9 +15,13 @@ export class EventApplications {
     }
     //define routes
     private initializedRoutes(): void {
-        this.router.post("/:eventId/apply", this.eventApplication.applyToEvent);
-        this.router.get("/:eventId/applications", this.eventApplication.getApplicationsForEvent);
-        this.router.put("/:appId/result", this.eventApplication.markApplicationResult);
+        this.router.post("/:eventId/apply", this.eventApplication.applyToEvent); //public endpoint for all users to apply. 
+        this.router.get("/:eventId/applications", 
+            protect, adminGuard,
+            this.eventApplication.getApplicationsForEvent);//only admin is allowed  to view the applications doen by the students /guests. 
+        this.router.put("/:appId/result", 
+            protect, adminGuard,
+            this.eventApplication.markApplicationResult); //only admins cn updte the status of the applications after review!
 
     }
 }

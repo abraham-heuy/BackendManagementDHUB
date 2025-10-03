@@ -1,6 +1,7 @@
 import express, {Router } from "express";
 import {EventController} from "@app/Controllers/eventController"
 import { protect } from "@app/middlewares/RBAC/protect";
+import { adminorStaffGuard } from "@app/middlewares/RBAC/roleGuard";
 
 export class EventRoutes{
     public router : Router;
@@ -13,12 +14,19 @@ export class EventRoutes{
     }
 
     private initializedRoutes():void{
-        this.router.post("/create",protect, this.eventController.createEvent)
-        this.router.get("/", this.eventController.getEvents)
+        this.router.post("/create",
+            protect, 
+            adminorStaffGuard,
+            this.eventController.createEvent) //either be an admin or an associated management role? 
+        this.router.get("/", this.eventController.getEvents) // all users
         this.router.get("/:id", this.eventController.getEvent)
-        this.router.put("/:id", this.eventController.updateEvent)
-        this.router.delete("/:id", this.eventController.deleteEvent)
-        this.router.get("/category/:category", this.eventController.getEventsByCategory)
+        this.router.put("/:id",
+            protect,adminorStaffGuard,
+            this.eventController.updateEvent) //updatedby the one who posted it
+        this.router.delete("/:id",
+            protect,adminorStaffGuard,
+            this.eventController.deleteEvent)
+        this.router.get("/category/:category", this.eventController.getEventsByCategory) //filter can be done publicly by all users.
     }
 }
  

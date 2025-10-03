@@ -1,6 +1,7 @@
 // src/routes/studentActivityRoutes.ts
 import { StudentActivityController } from "@app/Controllers/studentActivityController";
 import { protect } from "@app/middlewares/RBAC/protect";
+import { studentGuard } from "@app/middlewares/RBAC/roleGuard";
 import { Router } from "express";
 
 const router = Router();
@@ -9,21 +10,21 @@ const controller = new StudentActivityController();
 // Student Routes
 router.get(
   "/stages/:stageId/activities",
-  protect,
+  protect,studentGuard,
   controller.getStageActivities
 );
 router.post(
   "/activities/:id/complete",
-  protect,
+  protect,studentGuard,
   controller.completeActivity
 );
 
-// Admin Routes
-router.get(
-  "/admin/students/:studentId/stages/:stageId/activities",
-  protect,
+// // Admin Routes
+// router.get(
+//   "/admin/students/:studentId/stages/:stageId/activities",
+//   protect,
 
-  controller.getStudentActivities
-);
+//   controller.getStudentActivities
+// );
 
 export default router;

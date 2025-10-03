@@ -165,4 +165,102 @@ export class NotificationController {
         res.json({ message: "Marked as read", id: notif.id });
         return
     });
+
+    //handle groups: 
+    /** Create a new notification group */
+createGroup = asyncHandler(async (req: UserRequest, res: Response) => {
+    try {
+      const { name, memberIds } = req.body;
+  
+      if (!name || typeof name !== "string") {
+        return res.status(400).json({ message: "Group name is required" });
+      }
+  
+      const members: User[] = [];
+      if (Array.isArray(memberIds)) {
+        for (const id of memberIds) {
+          const user = await this.userRepo.findOne({ where: { id } });
+          if (user) members.push(user);
+        }
+      }
+  
+      const group = this.groupRepo.create({ name, members });
+      await this.groupRepo.save(group);
+  
+      res.status(201).json(group);
+    } catch (err) {
+      console.error("Error creating group:", err);
+      res.status(500).json({ message: "Failed to create group" });
+    }
+  });
+  
+  /** Add users to an existing group */
+  addUsersToGroup = asyncHandler(async (req: UserRequest, res: Response) => {
+    try {
+      const { groupId, memberIds } = req.body;
+  
+      const group = await this.groupRepo.findOne({ where: { id: groupId }, relations: ["members"] });
+      if (!group) return res.status(404).json({ message: "Group not found" });
+  
+      for (const id of memberIds) {
+        const user = await this.userRepo.findOne({ where: { id } });
+        if (user && !group.members.some((m) => m.id === user.id)) {
+          group.members.push(user);
+        }
+      }
+  
+      await this.groupRepo.save(group);
+      res.json({ message: "Users added", group });
+    } catch (err) {
+      console.error("Error adding users to group:", err);
+      res.status(500).json({ message: "Failed to add users to group" });
+    }
+  });
+  
+  /** Remove a user from a group */
+  removeUserFromGroup = asyncHandler(async (req: UserRequest, res: Response) => {
+    try {
+      const { groupId, userId } = req.body;
+  
+      const group = await this.groupRepo.findOne({ where: { id: groupId }, relations: ["members"] });
+      if (!group) return res.status(404).json({ message: "Group not found" });
+  
+      group.members = group.members.filter((m) => m.id !== userId);
+      await this.groupRepo.save(group);
+  
+      res.json({ message: "User removed", group });
+    } catch (err) {
+      console.error("Error removing user from group:", err);
+      res.status(500).json({ message: "Failed to remove user from group" });
+    }
+  });
+  
+  /** List all groups with members */
+  listGroups = asyncHandler(async (_req: UserRequest, res: Response) => {
+    try {
+      const groups = await this.groupRepo.find({ relations: ["members"] });
+      res.json(groups);
+    } catch (err) {
+      console.error("Error listing groups:", err);
+      res.status(500).json({ message: "Failed to list groups" });
+    }
+  });
+  
+  /** Delete a group */
+  deleteGroup = asyncHandler(async (req: UserRequest, res: Response) => {
+    try {
+      const { groupId } = req.params;
+  
+      const group = await this.groupRepo.findOne({ where: { id: groupId } });
+      if (!group) return res.status(404).json({ message: "Group not found" });
+  
+      await this.groupRepo.remove(group);
+      res.json({ message: "Group deleted", id: groupId });
+    } catch (err) {
+      console.error("Error deleting group:", err);
+      res.status(500).json({ message: "Failed to delete group" });
+    }
+  });
+  
+  
 }

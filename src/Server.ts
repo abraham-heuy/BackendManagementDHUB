@@ -18,6 +18,7 @@ import studentStageRoutes from "./Routes/studentStageRoutes";
 import studentActivityRoutes from "./Routes/studentActivityRoutes";
 import progressLogRoutes from "./Routes/progressLogRoutes";
 import notificationRoutes from "./Routes/notificationRoutes";
+import stageActivityRoutes from "./Routes/stageActivityRoutes";
 
 
 // Load environment variables
@@ -50,6 +51,7 @@ app.use("/api/v1/stages", studentStageRoutes)
 app.use("/api/v1/studentActivities", studentActivityRoutes)
 app.use("/api/v1/logs", progressLogRoutes)
 app.use("/api/v1/notifications", notificationRoutes)
+app.use("/api/v1/activities", stageActivityRoutes)
 
 // Test route
 app.get("/", (req, res) => {

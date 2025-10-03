@@ -12,8 +12,13 @@ export class AuthController {
 
   // ✅ Admin registers a new user
 
-register = async (req: Request, res: Response): Promise<Response> => {
+register = async (req: UserRequest, res: Response): Promise<Response> => {
   try {
+    const { id } = req.params;
+
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized: No user found!" });
+    }
     const { fullName, email, password, roleName, regNumber, stage } = req.body;
 
     // Check if user exists
@@ -36,7 +41,7 @@ register = async (req: Request, res: Response): Promise<Response> => {
       password: hashedPassword,
       regNumber,
       role,
-      stage: roleName === "student" ? stage || null : null, // only students have stage
+      stage: roleName === "student" ? stage || null : null, // only students have  a stage from our entity(User), umeelewa? 
     });
 
     await this.userRepository.save(user);

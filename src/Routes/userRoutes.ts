@@ -1,5 +1,7 @@
 import express, { Router } from "express";
 import { UserController } from "@app/Controllers/userController";
+import { protect } from "@app/middlewares/RBAC/protect";
+import { adminGuard } from "@app/middlewares/RBAC/roleGuard";
 
 export class UserRoutes {
     public router: Router;
@@ -12,10 +14,10 @@ export class UserRoutes {
     }
 
     private initializeRoutes(): void {
-        this.router.get("/", this.userController.fetchUsers);
-        this.router.get("/:id", this.userController.fetchUserById);
-        this.router.put("/:id", this.userController.updateUser);
-        this.router.delete("/:id", this.userController.removeUser);
+        this.router.get("/",protect,adminGuard, this.userController.fetchUsers);
+        this.router.get("/:id",protect,adminGuard,this.userController.fetchUserById);
+        this.router.put("/:id",protect,adminGuard,this.userController.updateUser);
+        this.router.delete("/:id",protect,adminGuard,this.userController.removeUser);
     }
 }
 

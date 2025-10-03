@@ -15,3 +15,4 @@ router.post("/me", protect, controller.upsertMyProfile);
 router.get("/:userId", protect, controller.getProfileByUserId);
 
 export default router;
+//protect them with guards for admins not to makeprofiles?  YES!

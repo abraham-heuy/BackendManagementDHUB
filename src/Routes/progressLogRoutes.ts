@@ -2,6 +2,7 @@
 import { Router } from "express";
 import { protect } from "@app/middlewares/RBAC/protect";
 import { ProgressLogController } from "@app/Controllers/progressLogControllers";
+import { adminGuard, adminorStudents } from "@app/middlewares/RBAC/roleGuard";
 
 export class ProgressLogRoutes {
   public router: Router;
@@ -15,13 +16,19 @@ export class ProgressLogRoutes {
 
   private initializeRoutes() {
     // Create a progress log
-    this.router.post("/", protect, this.controller.createLog);
+    this.router.post("/", 
+      protect,adminGuard,
+      this.controller.createLog);
 
     // Get logs for a specific student
-    this.router.get("/student/:studentId", protect, this.controller.getLogsForStudent);
+    this.router.get("/student/:studentId",
+       protect, adminorStudents,
+      this.controller.getLogsForStudent);
 
     // Get all logs
-    this.router.get("/", protect, this.controller.getAllLogs);
+    this.router.get("/", 
+      protect,adminGuard, 
+      this.controller.getAllLogs);
 
   }
 }
