@@ -1,6 +1,5 @@
 import { StudentStageController } from "@app/Controllers/studentStageController";
 import { protect } from "@app/middlewares/RBAC/protect";
-import { adminGuard, studentGuard } from "@app/middlewares/RBAC/roleGuard";
 import { Router } from "express";
 
 
@@ -16,7 +15,7 @@ const stageController = new StudentStageController();
 // @access Private (Student)
 router.get(
     "/me/current",
-    protect,studentGuard,
+    protect,
     stageController.getMyCurrentStage
 );
 
@@ -24,7 +23,7 @@ router.get(
 // @desc Get all my stages (history + current)
 // @access Private (Student)
 router.get(
-    "/me",studentGuard,
+    "/me",
     protect,
     stageController.getMyStages
 );
@@ -38,7 +37,7 @@ router.get(
 // @access Private (Admin only)
 router.get(
     "/",
-    protect,adminGuard,
+    protect,
     stageController.listAllStudentStages
 );
 
@@ -47,7 +46,7 @@ router.get(
 // @access Private (Admin only)
 router.post(
     "/advance",
-    protect, adminGuard, 
+    protect,
     stageController.advanceStudentStage
 );
 
