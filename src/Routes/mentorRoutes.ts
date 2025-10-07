@@ -15,38 +15,47 @@ export class MentorProfileRoutes {
   }
 
   private initializeRoutes(): void {
+    //get all the mentors from the logged data!
+    this.router.get("/all",
+      protect, adminGuard,
+      this.controller.getAllMentors
+    )
     // Mentor: Get my profile (protected by guard, id must match logged user)
     this.router.get("/me/profile",
       protect, mentorGuard,
       this.controller.getMyProfile);
 
     // Mentor: Create or update my profile (protected by guard, id must match logged user)
-    this.router.post("/me/profile", 
-      protect, mentorGuard, 
+    this.router.post("/me/profile",
+      protect,
       this.controller.upsertMyProfile);
 
     // Admin/Mentor: Get profile by mentorId (admin can view any, mentor can view self)
     this.router.get("/profile/:mentorId",
-      protect, adminorStaffGuard, 
+      protect, adminorStaffGuard,
       this.controller.getProfileByMentorId);
 
     // Mentor: Get my allocated students (protected by guard, id must match logged user)
-    this.router.get("/me/students", 
-      protect, mentorGuard, 
+    this.router.get("/me/students",
+      protect,
       this.controller.getMyStudents);
 
     // Student: Get my allocated mentor (protected by guard, id must match logged user)
-    this.router.get("/me/mentor", 
-      protect, studentGuard, 
-      this.controller.getMyMentor);  
+    this.router.get("/me/mentor",
+      protect, studentGuard,
+      this.controller.getMyMentor);
 
     // Admin: Assign a student to a mentor
-    this.router.post("/assign", 
+    this.router.post("/assign",
       protect, adminGuard,
       this.controller.assignStudent);
-
+      //get ll allocations.
+    this.router.get("/allocations",
+      protect, adminGuard,
+      this.controller.getAllAllocations
+    )
     // Admin: Unassign a student from a mentor
-    this.router.delete("/allocation/:allocationId", 
+    this.router.delete("/allocation/:allocationId",
       protect, adminGuard,
       this.controller.unassignStudent);
   }

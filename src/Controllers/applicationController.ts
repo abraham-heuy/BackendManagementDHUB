@@ -40,7 +40,7 @@ export class ApplicationController {
       businessIdea,
       problemStatement,
       solution,
-      targetMarket,
+      targetMarket, 
       revenueModel,
       event,
     });

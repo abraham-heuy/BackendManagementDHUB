@@ -21,6 +21,14 @@ router.get("/:userId",
     protect,adminGuard, 
     controller.getProfileByUserId);
 
+    router.get(
+        "/",
+        protect,
+        adminGuard,
+        controller.listProfiles
+      );
+      
+
 export default router;
 //protect them with guards for admins not to makeprofiles?  YES!
 
