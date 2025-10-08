@@ -104,7 +104,7 @@ export class EventController {
     const updatedEvent = await this.eventRepository.save(event);
 
     res.status(200).json({
-      message: "Event updated successfully",
+      message: "Event updated successfully", 
       event: updatedEvent,
     });
   });

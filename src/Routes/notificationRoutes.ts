@@ -19,7 +19,8 @@ export class NotificationRoutes {
     // Admin broadcast
     this.router.post("/broadcast", protect,adminGuard,this.controller.broadcastNotification);
     // Get logged-in user's notifications
-    this.router.get("/", protect,adminGuard,this.controller.getMyNotifications);
+    this.router.get("/", protect,this.controller.getMyNotifications);
+    this.router.get("/admin", protect,adminGuard, this.controller.getMyNotifications)
     // Mark as read
     this.router.patch("/:id/read", protect,adminGuard, this.controller.markAsRead);
     //group routes? 

@@ -19,8 +19,9 @@ import studentActivityRoutes from "./Routes/studentActivityRoutes";
 import progressLogRoutes from "./Routes/progressLogRoutes";
 import notificationRoutes from "./Routes/notificationRoutes";
 import stageActivityRoutes from "./Routes/stageActivityRoutes";
-import { ppid } from "process";
-import mentorRoutes from "./Routes/mentorRoutes";
+import  MentorProfileRoutes  from "./Routes/mentorRoutes";
+import analyticsRoutes from "./Routes/analyticsRoutes";
+import reportRoutes from "./Routes/reportRoutes";
 
 
 // Load environment variables
@@ -37,7 +38,7 @@ app.use(cookieParser());
 app.use(
   cors({
     origin: "http://localhost:5173",
-    methods: ["GET", "POST", "PUT", "DELETE"],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
   })
@@ -54,7 +55,9 @@ app.use("/api/v1/studentActivities", studentActivityRoutes)
 app.use("/api/v1/logs", progressLogRoutes)
 app.use("/api/v1/notifications", notificationRoutes)
 app.use("/api/v1/activities", stageActivityRoutes)
-app.use("/api/v1/mentors", mentorRoutes)
+app.use("/api/v1/mentor", MentorProfileRoutes)
+app.use("/api/v1/analytics", analyticsRoutes)
+app.use("/api/v1/reports", reportRoutes)
 
 // Test route
 app.get("/", (req, res) => {

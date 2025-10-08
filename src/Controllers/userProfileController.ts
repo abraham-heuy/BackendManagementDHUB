@@ -71,9 +71,9 @@ upsertMyProfile = asyncHandler(async (req: UserRequest, res: Response) => {
   });
 
   // @desc List all profiles (for admin dashboard)
-  listProfiles = asyncHandler(async (_req: Request, res: Response) => {
+  listProfiles = asyncHandler(async (_req: UserRequest, res: Response) => {
     const profiles: StudentProfile[] = await this.profileRepo.find({
-      relations: ["user"],
+      relations: ["user"], 
     });
 
     return res.json(profiles);

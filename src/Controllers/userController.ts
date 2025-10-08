@@ -21,6 +21,7 @@ export class UserController {
         email: u.email,
         regNumber: u.regNumber,
         role: u.role?.name,
+        stage: u.stage
       })),
     });
   });

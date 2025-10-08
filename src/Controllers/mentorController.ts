@@ -10,6 +10,33 @@ export class MentorProfileController {
   private profileRepo = AppDataSource.getRepository(MentorProfile);
   private allocRepo = AppDataSource.getRepository(MentorAllocation);
   private userRepo = AppDataSource.getRepository(User);
+/** ✅ Admin: Get all mentors with profiles */
+getAllMentors = asyncHandler(async (req: UserRequest, res: Response) => {
+  try {
+    const mentors = await this.profileRepo.find({
+      relations: ["user"],
+      order: { created_at: "DESC" },
+    });
+
+    const formatted = mentors.map((m) => ({
+      user: {
+        id: m.user.id, 
+        fullName: m.user.fullName,
+        email: m.user.email,
+      },
+      specialization: m.specialization,
+      experience: m.experience,
+      recentProject: m.recentProject,
+      contact: m.contact,
+    }));
+    
+
+    res.json(formatted);
+  } catch (err) {
+    console.error("Error fetching all mentors:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
   /** ✅ Mentor: Get my profile */
   getMyProfile = asyncHandler(async (req: UserRequest, res: Response) => {
@@ -188,4 +215,34 @@ export class MentorProfileController {
       res.status(500).json({ message: "Server error" });
     }
   });
+
+  /** ✅ Admin: View all mentor-student allocations */
+getAllAllocations = asyncHandler(async (req: UserRequest, res: Response) => {
+  try {
+    const allocations = await this.allocRepo.find({
+      relations: ["mentor", "mentor.mentorProfile", "student", "student.profile"],
+      order: { created_at: "DESC" },
+    });
+
+    const formatted = allocations.map((a) => ({
+      id: a.id,
+      mentor: {
+        id: a.mentor.id,
+        name: a.mentor.fullName,
+        specialization: a.mentor.mentorProfile?.specialization,
+      },
+      student: {
+        id: a.student.id,
+        name: a.student.fullName,
+        field: a.student.profile?.field,
+      },
+    }));
+
+    res.json({ allocations: formatted });
+  } catch (err) {
+    console.error("Error fetching all allocations:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
 }
