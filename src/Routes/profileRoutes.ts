@@ -1,7 +1,7 @@
 // src/routes/studentProfileRoutes.ts
 import { StudentProfileController } from "@app/Controllers/userProfileController";
 import { protect } from "@app/middlewares/RBAC/protect";
-import { adminGuard, studentGuard } from "@app/middlewares/RBAC/roleGuard";
+import { adminGuard, adminorStaffGuard, studentGuard } from "@app/middlewares/RBAC/roleGuard";
 import { Router } from "express";
 
 
@@ -18,7 +18,7 @@ router.post("/me", protect, studentGuard,
 
 // Admin/Mentor routes
 router.get("/:userId", 
-    protect,adminGuard, 
+    protect, adminorStaffGuard,  
     controller.getProfileByUserId);
 
     router.get(
