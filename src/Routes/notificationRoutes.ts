@@ -22,7 +22,7 @@ export class NotificationRoutes {
     this.router.get("/", protect,this.controller.getMyNotifications);
     this.router.get("/admin", protect,adminGuard, this.controller.getMyNotifications)
     // Mark as read
-    this.router.patch("/:id/read", protect,adminGuard, this.controller.markAsRead);
+    this.router.patch("/:id/read", protect, this.controller.markAsRead);
     //group routes? 
     this.router.post("/groups", protect,adminGuard,this.controller.createGroup);
     this.router.get("/groups", protect,adminGuard, this.controller.listGroups);
