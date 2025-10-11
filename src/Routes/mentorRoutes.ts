@@ -46,10 +46,10 @@ export class MentorProfileRoutes {
       this.controller.getMyMentor);
 
     // Admin: Assign a student to a mentor
-    this.router.post("/assign",
+    this.router.post("/allocate",
       protect, adminGuard,
       this.controller.assignStudent);
-      //get ll allocations.
+      //get all allocations.
     this.router.get("/allocations",
       protect, adminGuard,
       this.controller.getAllAllocations

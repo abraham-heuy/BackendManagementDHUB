@@ -97,8 +97,43 @@ export class UserController {
     });
   });
 
+  // PATCH /users/self
+  patchAdminDetails = asyncHandler(async (req: UserRequest, res: Response) => {
+    const userId = req.user?.id; 
+    const { fullName, email, password } = req.body
 
-  // ✅ Delete user
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const user = await this.userRepo.findOne({ where: { id: userId } });
+    if (!user) {
+      return res.status(404).json({ success: false, message: "User not found" });
+    }
+
+    // Update fields
+    if (fullName) user.fullName = fullName;
+    if (email) user.email = email;
+    if (password) user.password = await bcrypt.hash(password, 10);
+
+    const updatedUser = await this.userRepo.save(user);
+
+    res.json({
+      success: true,
+      message: "Admin details updated successfully",
+      user: {
+        id: updatedUser.id,
+        fullName: updatedUser.fullName,
+        email: updatedUser.email,
+        regNumber: updatedUser.regNumber,
+        role: updatedUser.role?.name,
+        stage: updatedUser.stage,
+      },
+    });
+  });
+
+
+  // ✅ Delete user 
   removeUser = asyncHandler(async (req: UserRequest, res: Response) => {
     const { id } = req.params;
 

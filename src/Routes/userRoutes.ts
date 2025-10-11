@@ -17,6 +17,7 @@ export class UserRoutes {
         this.router.get("/",protect,adminGuard, this.userController.fetchUsers);
         this.router.get("/:id",protect,adminGuard,this.userController.fetchUserById);
         this.router.put("/:id",protect,adminGuard,this.userController.updateUser);
+        this.router.patch("/self", protect,adminGuard, this.userController.patchAdminDetails);
         this.router.delete("/:id",protect,adminGuard,this.userController.removeUser);
     }
 }
