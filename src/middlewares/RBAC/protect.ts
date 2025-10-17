@@ -43,13 +43,13 @@ export const protect = asyncHandler(async (req: UserRequest, res: Response, next
       return res.status(401).json({ message: "User not found" });
     }
 
-    // 6️⃣ Attach to request with role name 
-    req.user = {
-      id: user.id,
-      email: user.email,
-      fullName: user.fullName,
-      role: user.role?.name || "student", // default fallback
-    };
+  // 6️⃣ Attach to request with role name
+  req.user = {
+    id: user.id,
+    email: user.email,
+    fullName: user.fullName,
+    role: user.role ? { id: user.role.id.toString(), name: user.role.name } : undefined,
+  };
 
     next();
   } catch (err) {

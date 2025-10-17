@@ -3,17 +3,18 @@ import { DataSource } from "typeorm"
 import dotenv from "dotenv"
 import { User } from "@app/entity/User"
 import { EventApplication } from "@app/entity/EventApplication"
-import { StudentProfile } from "@app/entity/StudentProfile"
-import { ProgressLog } from "@app/entity/ProcessLog"
 import { MentorAllocation } from "@app/entity/MentorAllocation"
 import { Event } from "@app/entity/Event"
 import { Notification } from "@app/entity/Notifications"
 import { Role } from "@app/entity/Role"
-import { StudentActivity } from "@app/entity/StudentActivity"
-import { StudentStage } from "@app/entity/StudentStage"
-import { StageActivity } from "@app/entity/StageActivity"
 import { NotificationGroup } from "@app/entity/NotificationGroup"
 import { MentorProfile } from "@app/entity/mentorProfile"
+import { MenteeProfile } from "@app/entity/menteeProfile"
+import { Stage } from "@app/entity/stage"
+import { SubStage } from "@app/entity/substage"
+import { Startup } from "@app/entity/startup"
+import { StartupProgress } from "@app/entity/startupActivity"
+import { Applications } from "@app/entity/pitching_applications"
 dotenv.config()
 
 export const AppDataSource = new DataSource({
@@ -26,16 +27,18 @@ export const AppDataSource = new DataSource({
     entities: [User,
         Role,
         EventApplication,
-        StudentProfile,
-        ProgressLog,
+        MenteeProfile,
         MentorAllocation,
         Event,
         Notification,
-        StudentActivity,
-        StudentStage,
-        StageActivity,
         NotificationGroup,
-        MentorProfile
+        MentorProfile,
+        Stage,
+        SubStage,
+        Startup,
+        StartupProgress,
+        Applications
+        
     ],
     migrations: ["src/migrations/*.ts"],
     synchronize: false,

@@ -10,15 +10,16 @@ import {
   JoinColumn,
 } from "typeorm";
 import { Role } from "./Role";
-import { StudentProfile } from "./StudentProfile";
 import { MentorAllocation } from "./MentorAllocation";
 import { Event } from "./Event";
 import { EventApplication } from "./EventApplication";
-import { Stage } from "./stage";
-import { ProgressLog } from "./ProcessLog";
-import { StudentStage } from "./StudentStage";
 import { Notification } from "./Notifications";
+import { MenteeProfile } from "./menteeProfile";
 import { MentorProfile } from "./mentorProfile";
+import { Stage } from "./stage";
+import { Startup } from "./startup";
+import { StartupProgress } from "./startupActivity";
+
 
 @Entity("users")
 export class User {
@@ -29,7 +30,7 @@ export class User {
   email!: string;
 
   @Column()
-  password!: string; // hashed
+  password!: string;
 
   @Column()
   fullName!: string;
@@ -37,19 +38,37 @@ export class User {
   @Column({ nullable: true })
   regNumber?: string;
 
-  // default to PRE_INCUBATION for new students; nullable so admins/mentors can omit
-  @Column({
-    type: "enum",
-    enum: Stage,
-    nullable: true,
-    default: Stage.PRE_INCUBATION,
-  })
-  stage?: Stage | null;
+  @Column({ default: true })
+  isActive!: boolean;
 
-  // Role FK (admin, student, mentor, etc.)
-  @ManyToOne(() => Role, (role) => role.users, { eager: true, nullable: true })
+  @Column({ nullable: true })
+  currentProject?: string;
+
+  // ========== Relationships ==========
+
+  @ManyToOne(() => Role, (role) => role.users, {
+    eager: true,
+    nullable: true,
+    onDelete: "SET NULL",
+  })
   @JoinColumn({ name: "role_id" })
   role?: Role | null;
+
+  // User’s current stage (optional — program-level)
+  @ManyToOne(() => Stage, (stage) => stage.users, {
+    nullable: true,
+    onDelete: "SET NULL",
+  })
+  @JoinColumn({ name: "stage_id" })
+  stage?: Stage | null;
+
+  // User as founder in one or more startups
+  @OneToMany(() => Startup, (startup) => startup.founder)
+  startups!: Startup[];
+
+  // If user acts as admin or reviewer for startup progress
+  @OneToMany(() => StartupProgress, (progress) => progress.reviewedBy)
+  reviewedProgressRecords!: StartupProgress[];
 
   @CreateDateColumn()
   created_at!: Date;
@@ -57,32 +76,25 @@ export class User {
   @UpdateDateColumn()
   updated_at!: Date;
 
-  // Relations
+  // ========== One-to-Many / One-to-One relations ==========
+
   @OneToMany(() => Event, (event) => event.createdBy)
   createdEvents!: Event[];
 
-  // Optional: applications by registered users (event applications can also be anonymous)
   @OneToMany(() => EventApplication, (app) => app.student)
   applications!: EventApplication[];
 
-  @OneToOne(() => StudentProfile, (profile) => profile.user)
-  profile!: StudentProfile;
+  @OneToOne(() => MenteeProfile, (profile) => profile.user)
+  menteeProfile!: MenteeProfile;
 
-  @OneToMany(() => ProgressLog, (log) => log.student)
-  progressLogs!: ProgressLog[];
+  @OneToOne(() => MentorProfile, (profile) => profile.user)
+  mentorProfile!: MentorProfile;
 
   @OneToMany(() => MentorAllocation, (alloc) => alloc.student)
   mentorAllocationsAsStudent!: MentorAllocation[];
 
   @OneToMany(() => MentorAllocation, (alloc) => alloc.mentor)
   mentorAllocationsAsMentor!: MentorAllocation[];
-  // inside User entity
-  
-  @OneToOne(() => MentorProfile, (profile) => profile.user)
-  mentorProfile!: MentorProfile;
-  // Student-stage instances (history / current)
-  @OneToMany(() => StudentStage, (ss) => ss.student)
-  studentStages!: StudentStage[];
 
   @OneToMany(() => Notification, (notif) => notif.user)
   notifications!: Notification[];
