@@ -18,6 +18,63 @@ const stageRepo = AppDataSource.getRepository(Stage);
 const subStageRepo = AppDataSource.getRepository(SubStage);
 
 export class ApplicationsController {
+
+  createApplication = asyncHandler(async (req: UserRequest, res: Response) => {
+    const {
+      first_name,
+      last_name,
+      surname,
+      email,
+      phone,
+      regNo,
+      businessIdea,
+      problemStatement,
+      solution,
+      targetMarket,
+      revenueModel,
+      teamMembers,
+    } = req.body;
+  
+    // ✅ Validate required fields
+    if (!first_name || !last_name || !email || !businessIdea || !problemStatement || !solution) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+  
+    // ✅ Check if user already applied
+    const existing = await applicationRepo.findOne({ where: { email } });
+    if (existing) {
+      return res.status(400).json({ message: "An application with this email already exists" });
+    }
+  
+    // ✅ Create application aligned with entity fields
+    const newApp = applicationRepo.create({
+      first_name,
+      last_name,
+      surname,
+      email,
+      phone,
+      regNo,
+      businessIdea,
+      problemStatement,
+      solution,
+      targetMarket: targetMarket || "Not specified",
+      revenueModel: revenueModel || "Not specified",
+      teamMembers: Array.isArray(teamMembers)
+        ? teamMembers
+        : teamMembers
+        ? [teamMembers]
+        : [],
+      status: "pending",
+    });
+  
+    await applicationRepo.save(newApp);
+  
+    res.status(201).json({
+      message: "Application submitted successfully",
+      application: newApp,
+    });
+  });
+  
   listApplications = asyncHandler(async (_req: UserRequest, res: Response) => {
     const apps = await applicationRepo.find({
       relations: ["user", "startup"],

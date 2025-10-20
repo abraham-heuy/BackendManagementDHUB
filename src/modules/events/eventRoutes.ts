@@ -19,6 +19,8 @@ export class EventRoutes{
             adminGuard,
             this.eventController.createEvent) //either be an admin or an associated management role? 
         this.router.get("/", this.eventController.getEvents) // all users
+        this.router.get("/roles",protect,adminGuard,this.eventController.getRolesList)
+        this.router.get("/stages", protect,adminGuard,this.eventController.getStagesList)
         this.router.get("/:id", this.eventController.getEvent)
         this.router.put("/:id",
             protect,adminGuard,

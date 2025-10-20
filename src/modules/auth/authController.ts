@@ -155,14 +155,25 @@ export class AuthController {
     if (!req.user) {
       return res.status(401).json({ message: "Not authorized" });
     }
-
+  
+    // Ensure role is properly fetched (in case of lazy loading)
+    let user = await this.userRepository.findOne({
+      where: { id: req.user.id },
+      relations: ["role"],
+    });
+  
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+  
     return res.status(200).json({
-      id: req.user.id,
-      fullName: req.user.fullName,
-      email: req.user.email,
-      role: req.user.role,
+      id: user.id,
+      fullName: user.fullName,
+      email: user.email,
+      role: user.role?.name, 
     });
   };
+  
 
   /**
    * ✅ Forgot password

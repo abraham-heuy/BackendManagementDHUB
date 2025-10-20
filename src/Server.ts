@@ -54,7 +54,7 @@ app.use("/api/v1/notifications", notificationRoutes)
 app.use("/api/v1/mentor", MentorProfileRoutes)
 app.use("/api/v1/analytics", analyticsRoutes)
 app.use("/api/v1/reports", reportRoutes)
-app.use("api/v1/pitch", pitchApplicationRoutes)
+app.use("/api/v1/pitch", pitchApplicationRoutes)
 app.use("/api/v1/startup", startupRoutes)
 app.use("/api/v1/activities", new StageRoutes().router)
 

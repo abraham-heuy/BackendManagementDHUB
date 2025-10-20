@@ -258,4 +258,35 @@ export class EventController {
 
     res.json({ message: `Events in category: ${category}`, events });
   });
+
+
+    // GET /events/roles
+    getRolesList = asyncHandler(async (_req: UserRequest, res: Response) => {
+      const roles = await this.roleRepository.find({ order: { id: "ASC" } });
+      // Return as simple array of { id, name }
+      const payload = roles.map((r) => ({ id: r.id, name: r.name }));
+      res.status(200).json({ message: "Roles fetched", roles: payload });
+    });
+  
+    // GET /events/stages
+    getStagesList = asyncHandler(async (_req: UserRequest, res: Response) => {
+      // include substages if you want them returned together
+      const stages = await this.stageRepository.find({ relations: ["substages"], order: { order: "ASC" } });
+  
+      // normalize: return id, name, order, and an optional substages array
+      const payload = stages.map((s) => ({
+        stage_id: (s as any).stage_id ?? (s as any).id ?? s.stage_id, // defensive in case naming differs
+        name: (s as any).name ?? (s as any).title ?? s.name,
+        order: (s as any).order,
+        substages: (s as any).substages?.map((sub: any) => ({
+          substage_id: sub.substage_id ?? sub.id,
+          name: sub.name,
+          order: sub.order,
+          status: sub.status ?? undefined,
+        })) ?? [],
+      }));
+  
+      res.status(200).json({ message: "Stages fetched", stages: payload });
+    });
+  
 }
