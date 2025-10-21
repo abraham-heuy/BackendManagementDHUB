@@ -3,9 +3,7 @@ import { AppDataSource } from "@app/DB/data-source";
 import { Between } from "typeorm";
 import { User } from "@app/entity/User";
 import { Role } from "@app/entity/Role";
-import { StudentStage } from "@app/entity/StudentStage";
-import { StudentActivity } from "@app/entity/StudentActivity";
-import { StageActivity } from "@app/entity/StageActivity";
+
 import { Event } from "@app/entity/Event";
 import { EventApplication } from "@app/entity/EventApplication";
 import { MentorProfile } from "@app/entity/mentorProfile";
@@ -15,9 +13,7 @@ import { Notification } from "@app/entity/Notifications";
 export class AnalyticsService {
   private userRepo = AppDataSource.getRepository(User);
   private roleRepo = AppDataSource.getRepository(Role);
-  private studentStageRepo = AppDataSource.getRepository(StudentStage);
-  private studentActivityRepo = AppDataSource.getRepository(StudentActivity);
-  private stageActivityRepo = AppDataSource.getRepository(StageActivity);
+
   private eventRepo = AppDataSource.getRepository(Event);
   private eventAppRepo = AppDataSource.getRepository(EventApplication);
   private mentorProfileRepo = AppDataSource.getRepository(MentorProfile);
@@ -45,42 +41,42 @@ export class AnalyticsService {
     return { totalUsers, usersByRole, newRegistrations, requestedBy: userId };
   }
 
-  // 🎓 STAGES & PROGRESS
-  async getStageProgressStats(userId: string) {
-    const totalStudentStages = await this.studentStageRepo.count();
+  // // 🎓 STAGES & PROGRESS
+  // async getStageProgressStats(userId: string) {
+  //   const totalStudentStages = await this.studentStageRepo.count();
 
-    const stageDistribution = await this.studentStageRepo
-      .createQueryBuilder("ss")
-      .select("ss.stage", "stage")
-      .addSelect("COUNT(ss.id)", "count")
-      .groupBy("ss.stage")
-      .getRawMany();
+  //   const stageDistribution = await this.studentStageRepo
+  //     .createQueryBuilder("ss")
+  //     .select("ss.stage", "stage")
+  //     .addSelect("COUNT(ss.id)", "count")
+  //     .groupBy("ss.stage")
+  //     .getRawMany();
 
-    const completionRates = await this.studentStageRepo
-      .createQueryBuilder("ss")
-      .select("ss.stage", "stage")
-      .addSelect(
-        `ROUND(AVG(CASE WHEN ss.status = 'completed' THEN 100 ELSE ss.progressPercent END), 2)`,
-        "averageProgress"
-      )
-      .groupBy("ss.stage")
-      .getRawMany();
+  //   const completionRates = await this.studentStageRepo
+  //     .createQueryBuilder("ss")
+  //     .select("ss.stage", "stage")
+  //     .addSelect(
+  //       `ROUND(AVG(CASE WHEN ss.status = 'completed' THEN 100 ELSE ss.progressPercent END), 2)`,
+  //       "averageProgress"
+  //     )
+  //     .groupBy("ss.stage")
+  //     .getRawMany();
 
-    const avgActivityCompletion = await this.studentActivityRepo
-      .createQueryBuilder("sa")
-      .select("sa.status", "status")
-      .addSelect("COUNT(sa.id)", "count")
-      .groupBy("sa.status")
-      .getRawMany();
+  //   const avgActivityCompletion = await this.studentActivityRepo
+  //     .createQueryBuilder("sa")
+  //     .select("sa.status", "status")
+  //     .addSelect("COUNT(sa.id)", "count")
+  //     .groupBy("sa.status")
+  //     .getRawMany();
 
-    return {
-      totalStudentStages,
-      stageDistribution,
-      completionRates,
-      avgActivityCompletion,
-      requestedBy: userId,
-    };
-  }
+  //   return {
+  //     totalStudentStages,
+  //     stageDistribution,
+  //     completionRates,
+  //     avgActivityCompletion,
+  //     requestedBy: userId,
+  //   };
+  // }
 
   // 🧩 EVENTS & APPLICATIONS
   async getEventStats(userId: string) {
@@ -139,14 +135,14 @@ export class AnalyticsService {
 
   // 📊 DASHBOARD SUMMARY
   async getDashboardSummary(userId: string) {
-    const [users, stages, events, mentors, notifications] = await Promise.all([
+    const [users, stages, events, mentors] = await Promise.all([
       this.getUserStats(userId),
-      this.getStageProgressStats(userId),
+      // this.getStageProgressStats(userId),
       this.getEventStats(userId),
       this.getMentorshipStats(userId),
       this.getNotificationStats(userId),
     ]);
 
-    return { users, stages, events, mentors, notifications, requestedBy: userId };
+    return { users, stages, events, mentors, requestedBy: userId };
   }
 }

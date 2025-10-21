@@ -2,14 +2,12 @@
 import { AppDataSource } from "@app/DB/data-source";
 import { Event } from "@app/entity/Event";
 import { EventApplication } from "@app/entity/EventApplication";
-import { StudentStage } from "@app/entity/StudentStage";
 import { MentorAllocation } from "@app/entity/MentorAllocation";
 import { User } from "@app/entity/User";
 
 export class ReportsService {
   private eventRepo = AppDataSource.getRepository(Event);
   private appRepo = AppDataSource.getRepository(EventApplication);
-  private stageRepo = AppDataSource.getRepository(StudentStage);
   private mentorAllocRepo = AppDataSource.getRepository(MentorAllocation);
   private userRepo = AppDataSource.getRepository(User);
 
@@ -40,18 +38,18 @@ export class ReportsService {
       .getRawMany();
   }
 
-  // 🎓 Student Progress Report
-  async getProgressReport() {
-    return await this.stageRepo
-      .createQueryBuilder("ss")
-      .leftJoin("ss.student", "student")
-      .select([
-        "student.fullName AS studentName",
-        "ss.stage AS stage",
-        "ss.status AS status"
-      ])
-      .getRawMany();
-  }
+  // // 🎓 Student Progress Report
+  // async getProgressReport() {
+  //   return await this.stageRepo
+  //     .createQueryBuilder("ss")
+  //     .leftJoin("ss.student", "student")
+  //     .select([
+  //       "student.fullName AS studentName",
+  //       "ss.stage AS stage",
+  //       "ss.status AS status"
+  //     ])
+  //     .getRawMany();
+  // }
 
   // 👨‍🏫 Mentor Allocation Report
   async getMentorAllocationReport() {
