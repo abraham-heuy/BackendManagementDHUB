@@ -10,6 +10,7 @@ const controller = new ApplicationsController();
 router.post("/", controller.createApplication);
 
 // Admin or reviewer protected routes
+router.post("/", protect, controller.listApplications);
 router.get("/", protect, controller.listApplications);
 router.get("/:id", protect, controller.getApplication);
 router.patch("/:applicationId/approve", protect, controller.approveApplication);

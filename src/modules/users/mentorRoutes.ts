@@ -54,6 +54,9 @@ export class MentorProfileRoutes {
       protect, adminGuard,
       this.controller.getAllAllocations
     )
+    this.router.get("/recommended/:mentorId",
+       protect, adminGuard,
+        this.controller.getRecommendedMentees)
     // Admin: Unassign a student from a mentor
     this.router.delete("/allocation/:allocationId",
       protect, adminGuard,

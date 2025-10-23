@@ -8,6 +8,7 @@ import { SubStage } from "@app/entity/substage";
 import { StartupProgress } from "@app/entity/startupActivity";
 import { User } from "@app/entity/User";
 import { Stage } from "@app/entity/stage";
+import { title } from "process";
 
 const startupRepo = AppDataSource.getRepository(Startup);
 const subStageRepo = AppDataSource.getRepository(SubStage);
@@ -16,37 +17,57 @@ const userRepo = AppDataSource.getRepository(User);
 const stageRepo = AppDataSource.getRepository(Stage);
 
 export class StartupProgressController {
-  // 1️⃣ List all substages for the mentee
-  listMenteeSubstages = asyncHandler(async (req: UserRequest, res: Response) => {
-    const mentee = req.user!;
-    const startup = await startupRepo.findOne({
-      where: { founder: { id: mentee.id } },
-      relations: ["currentStage", "currentSubStage", "progressHistory"],
-    });
+  // 1️⃣ List all substages for the logged-in mentee
+listMenteeSubstages = asyncHandler(async (req: UserRequest, res: Response) => {
+  const mentee = req.user!;
 
-    if (!startup) return res.status(404).json({ message: "Startup not found" });
-
-    const substages = await subStageRepo.find({
-      where: { stage: { stage_id: startup.currentStage.stage_id } },
-      order: { order: "ASC" },
-      relations: ["createdBy"],
-    });
-
-    const result = substages.map((sub) => {
-      const progress = startup.progressHistory.find((p) => p.subStage.substage_id === sub.substage_id);
-      return {
-        substage_id: sub.substage_id,
-        name: sub.name,
-        order: sub.order,
-        weightScore: sub.weightScore,
-        status: progress?.status || "pending",
-        scoreAwarded: progress?.scoreAwarded || 0,
-        reviewerComment: progress?.comment || null,
-      };
-    });
-
-    res.status(200).json(result);
+  const startup = await startupRepo.findOne({
+    where: { founder: { id: mentee.id } },
+    relations: ["currentStage", "currentSubStage", "progressHistory"],
   });
+
+  if (!startup) return res.status(404).json({ message: "Startup not found" });
+
+  const substages = await subStageRepo.find({
+    where: { stage: { stage_id: startup.currentStage.stage_id } },
+    order: { order: "ASC" },
+    relations: ["createdBy"],
+  });
+
+  const result = substages.map((sub) => {
+    const progress = startup.progressHistory.find(
+      (p) => p.subStage.substage_id === sub.substage_id
+    );
+    return {
+      substage_id: sub.substage_id,
+      name: sub.name,
+      order: sub.order,
+      weightScore: sub.weightScore,
+      status: progress?.status || "pending",
+      scoreAwarded: progress?.scoreAwarded || 0,
+      reviewerComment: progress?.comment || null,
+    };
+  });
+
+  // 🔹 Include mentee & startup info in the response
+  res.status(200).json({
+    mentee: {
+      id: mentee.id,
+      fullName: mentee.fullName,
+      email: mentee.email,
+      role: mentee.role?.name || "mentee",
+    },
+    startup: {
+      id: startup.startup_id,
+      title: startup.title,
+      currentStage: startup.currentStage?.name,
+      currentSubStage: startup.currentSubStage?.name,
+      cumulativeScore: startup.cumulativeScore || 0,
+    },
+    substages: result,
+  });
+});
+
 
   // 2️⃣ Mentee submits a substage activity
   submitSubstage = asyncHandler(async (req: UserRequest, res: Response) => {

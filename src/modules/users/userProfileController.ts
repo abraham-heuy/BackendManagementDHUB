@@ -60,6 +60,7 @@ export class MenteeProfileController {
       category,
       bio,
       skills,
+      startup_idea,
       phone,
       linkedIn,
       website,

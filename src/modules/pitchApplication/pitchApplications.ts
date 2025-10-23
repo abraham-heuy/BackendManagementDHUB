@@ -20,7 +20,6 @@ const subStageRepo = AppDataSource.getRepository(SubStage);
 const roleRepo = AppDataSource.getRepository(Role);
 
 export class ApplicationsController {
-
   createApplication = asyncHandler(async (req: UserRequest, res: Response) => {
     const {
       first_name,
@@ -36,17 +35,18 @@ export class ApplicationsController {
       revenueModel,
       teamMembers,
     } = req.body;
-
+  
     // ✅ Validate required fields
     if (!first_name || !last_name || !email || !businessIdea || !problemStatement || !solution) {
       return res.status(400).json({ message: "Missing required fields" });
     }
-
-    // ✅ Check if user already applied and has same Idea application=
-    const existing = await applicationRepo.findOne({ where: { email, businessIdea } });
+  
+    // ✅ Check if user already applied
+    const existing = await applicationRepo.findOne({ where: { email } });
     if (existing) {
       return res.status(400).json({ message: "You have already applied with this business idea" });
     }
+  
     // ✅ Create application aligned with entity fields
     const newApp = applicationRepo.create({
       first_name,
@@ -79,8 +79,9 @@ export class ApplicationsController {
   listApplications = asyncHandler(async (_req: UserRequest, res: Response) => {
     const apps = await applicationRepo.find({
       relations: ["user", "startup"],
-      order: { createdAt: "DESC" },
+      order: { createdAt: "DESC" }, 
     });
+
     res.status(200).json(apps);
   });
 
@@ -96,19 +97,18 @@ export class ApplicationsController {
 
     res.status(200).json(app);
   });
-
   approveApplication = asyncHandler(async (req: UserRequest, res: Response) => {
     const { applicationId } = req.params;
-
+  
     const app = await applicationRepo.findOne({
       where: { application_id: applicationId },
       relations: ["user"],
     });
-
+  
     if (!app) return res.status(404).json({ message: "Application not found" });
     if (app.status === "approved")
       return res.status(400).json({ message: "Application already approved" });
-
+  
     app.status = "approved";
     await applicationRepo.save(app);
 
@@ -120,17 +120,17 @@ export class ApplicationsController {
     // Try to find user
     let user = await userRepo.findOne({ where: { email: app.email } });
 
-    // If user not found, create one and add a role of mentee
+    // If user not found, create one
     if (!user) {
+      const roleRepo = AppDataSource.getRepository("Role");
+      const menteeRole = await roleRepo.findOne({ where: { name: "mentee" } });
+      if (!menteeRole) {
+        return res.status(500).json({ message: "Default role 'mentee' not found in system" });
+      }
+  
       const emailPrefix = app.email.split("@")[0];
       const generatedPassword = `${emailPrefix}@Desic123`;
       const hashedPassword = await bcrypt.hash(generatedPassword, 10);
-
-      // ✅ Find the mentee role
-      const menteeRole = await roleRepo.findOne({ where: { name: ILike("mentee") } });
-      if (!menteeRole) {
-        return res.status(400).json({ message: "Mentee role not found in the system" });
-      }
 
       // ✅ Fix: avoid null assignment to optional properties
       const newUser = userRepo.create({
@@ -138,26 +138,28 @@ export class ApplicationsController {
         email: app.email,
         password: hashedPassword,
         regNumber: app.regNo || undefined, // undefined instead of null
-        role: menteeRole, // Assign mentee role
         // add phone if exists
         ...(app.phone ? { currentProject: app.phone } : {}),
       });
-
-      user = await userRepo.save(newUser);
+  
+      user = await userRepo.save(user);
       (user as any).generatedPassword = generatedPassword;
     }
-
+  
     app.user = user;
     await applicationRepo.save(app);
-
-    // Lookup default stage/substage
-    const stage = await stageRepo.findOne({ where: { name: ILike("pre-incubation") } });
-    const subStage = await subStageRepo.findOne({ where: { name: ILike("ideation") } });
-
-    if (!stage || !subStage)
-      return res.status(400).json({ message: "Default stage or sub-stage not found" });
-
-    // ✅ Fix: ensure founder is always defined (user guaranteed)
+  
+    // --- Get first stage and substage dynamically ---
+    const stage = await stageRepo.findOne({
+      where: { order: 1 },
+      relations: ["substages"],
+    });
+  
+    if (!stage) return res.status(400).json({ message: "No stage found with order = 1" });
+  
+    const subStage = stage.substages?.find((s) => s.order === 1) || null;
+  
+    // --- Create startup linked to mentee ---
     const startup = startupRepo.create({
       title: app.businessIdea?.substring(0, 60) || "New Startup",
       description: app.solution || "No description provided",
@@ -165,22 +167,41 @@ export class ApplicationsController {
       teamMembers: Array.isArray(app.teamMembers)
         ? app.teamMembers
         : app.teamMembers
-          ? [app.teamMembers]
-          : [],
-      currentStage: stage,
-      currentSubStage: subStage,
+        ? [app.teamMembers]
+        : [],
+      currentStage:stage,
+      currentSubStage:subStage,
       status: "active",
       application: app,
     });
-
+  
     await startupRepo.save(startup);
-
+  
+    // --- Link startup ID to user's current project ---
+    user.currentProject = startup.startup_id;
+    await userRepo.save(user);
+  
     res.status(201).json({
-      message: "Application approved. User and startup created successfully.",
-      user,
-      startup,
+      message: "Application approved. Mentee user and startup created successfully.",
+      user: {
+        id: user.id,
+        fullName: user.fullName,
+        email: user.email,
+        role: user.role?.name || "mentee",
+        regNumber: user.regNumber,
+        generatedPassword: (user as any).generatedPassword,
+      },
+      startup: {
+        id: startup.startup_id,
+        title: startup.title,
+        stage: stage.name,
+        subStage: subStage?.name || null,
+      },
     });
   });
+  
+  
+  
 
   rejectApplication = asyncHandler(async (req: UserRequest, res: Response) => {
     const { applicationId } = req.params;
