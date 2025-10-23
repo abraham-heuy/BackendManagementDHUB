@@ -17,9 +17,9 @@ export const roleGuard = (allowedRoles: string[]) => {
 };
 
 export const adminGuard =  roleGuard(["admin"]); //full control
-export const studentGuard =  roleGuard(["student"]); //student-based actions
+export const studentGuard =  roleGuard(["mentee"]); //mentee-based actions
 export const mentorGuard =  roleGuard(["mentor"]); //only relevant roles but limited
 export const adminorStaffGuard =  roleGuard(["admin", "mentor"]); //roles that require either a staff member or an admin
-export const  adminorStudents = roleGuard((["admin", "student"]));  //some routes can be accessed by both admins an students! 
+export const  adminorStudents = roleGuard((["admin", "mentee"]));  //some routes can be accessed by both admins an students! 
 
  

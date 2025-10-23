@@ -7,7 +7,7 @@ const router = Router();
 const controller = new ApplicationsController();
 
 // Admin or reviewer protected routes
-router.post("/", protect, controller.listApplications);
+router.post("/", controller.createApplication);
 router.get("/", protect, controller.listApplications);
 router.get("/:id", protect, controller.getApplication);
 router.patch("/:applicationId/approve", protect, controller.approveApplication);

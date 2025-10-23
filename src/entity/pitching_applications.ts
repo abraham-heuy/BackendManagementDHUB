@@ -68,9 +68,9 @@ export class Applications extends BaseEntity {
 
   @ManyToOne(() => User, (user) => user.applications, { onDelete: "CASCADE" })
   @JoinColumn({ name: "user_id" })
-  user!: User;
+  user?: User;
 
   @OneToOne(() => Startup, (startup) => startup.application, { cascade: true })
   @JoinColumn({ name: "startup_id" })
-  startup!: Startup;
+  startup?: Startup;
 }

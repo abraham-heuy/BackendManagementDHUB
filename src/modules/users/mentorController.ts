@@ -35,33 +35,51 @@ export class MentorProfileController {
     res.json(formatted);
   });
 
-  /** ✅ Mentor: Get recommended mentees for allocation (matches field first) */
-  getRecommendedMentees = asyncHandler(async (req: UserRequest, res: Response) => {
-    const mentorId = req.user!.id;
+/** ✅ Mentor: Get recommended mentees for allocation (matches field first) */
+getRecommendedMentees = asyncHandler(async (req: UserRequest, res: Response) => {
+  const mentorId = req.params.mentorId;
 
-    const mentorProfile = await this.profileRepo.findOne({
-      where: { user: { id: mentorId } },
-      relations: ["user"],
-    });
-    if (!mentorProfile) return res.status(404).json({ message: "Mentor profile not found" });
-
-    // All mentees
-    const allMentees = await this.menteeRepo.find({
-      relations: ["user"],
-    });
-
-    // Recommended first: matching field
-    const recommended = allMentees.filter(
-      (m) => m.field && m.field === mentorProfile.specialization
-    );
-
-    // Other mentees
-    const others = allMentees.filter(
-      (m) => !m.field || m.field !== mentorProfile.specialization
-    );
-
-    res.json({ recommended, others });
+  // Find mentor profile
+  const mentorProfile = await this.profileRepo.findOne({
+    where: { user: { id: mentorId } },
+    relations: ["user"],
   });
+  if (!mentorProfile) {
+    return res.status(404).json({ message: "Mentor profile not found" });
+  }
+
+  // Fetch all mentee profiles + user relation
+  const allMentees = await this.menteeRepo.find({
+    relations: ["user"],
+  });
+
+  // Split mentees by field match
+  const recommended = allMentees
+    .filter((m) => m.field && m.field === mentorProfile.specialization)
+    .map((m) => ({
+      user: {
+        id: m.user.id,
+        fullName: m.user.fullName,
+        email: m.user.email,
+      },
+      field: m.field,
+    }));
+
+  const others = allMentees
+    .filter((m) => !m.field || m.field !== mentorProfile.specialization)
+    .map((m) => ({
+      user: {
+        id: m.user.id,
+        fullName: m.user.fullName,
+        email: m.user.email,
+      },
+      field: m.field,
+    }));
+
+  // ✅ Return shape expected by frontend
+  return res.json({ recommended, others });
+});
+
 
   /** ✅ Mentor: Get my profile */
   getMyProfile = asyncHandler(async (req: UserRequest, res: Response) => {
