@@ -1,13 +1,15 @@
+// In your router file
 import { protect } from "@app/middlewares/RBAC/protect";
 import { Router } from "express";
 import { ApplicationsController } from "./pitchApplications";
 
-
 const router = Router();
 const controller = new ApplicationsController();
 
+// Public route - no protection needed for submissions
+router.post("/", controller.createApplication);
+
 // Admin or reviewer protected routes
-router.post("/", protect, controller.listApplications);
 router.get("/", protect, controller.listApplications);
 router.get("/:id", protect, controller.getApplication);
 router.patch("/:applicationId/approve", protect, controller.approveApplication);

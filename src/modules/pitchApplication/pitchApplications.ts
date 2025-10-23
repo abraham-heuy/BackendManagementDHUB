@@ -9,6 +9,7 @@ import { User } from "@app/entity/User";
 import { Startup } from "@app/entity/startup";
 import { SubStage } from "@app/entity/substage";
 import { Stage } from "@app/entity/stage";
+import { Role } from "@app/entity/Role";
 import { UserRequest } from "@app/Utils/Types/authenticatedUser";
 
 const applicationRepo = AppDataSource.getRepository(Applications);
@@ -16,6 +17,7 @@ const userRepo = AppDataSource.getRepository(User);
 const startupRepo = AppDataSource.getRepository(Startup);
 const stageRepo = AppDataSource.getRepository(Stage);
 const subStageRepo = AppDataSource.getRepository(SubStage);
+const roleRepo = AppDataSource.getRepository(Role);
 
 export class ApplicationsController {
 
@@ -34,18 +36,17 @@ export class ApplicationsController {
       revenueModel,
       teamMembers,
     } = req.body;
-  
+
     // ✅ Validate required fields
     if (!first_name || !last_name || !email || !businessIdea || !problemStatement || !solution) {
       return res.status(400).json({ message: "Missing required fields" });
     }
-  
-    // ✅ Check if user already applied
-    const existing = await applicationRepo.findOne({ where: { email } });
+
+    // ✅ Check if user already applied and has same Idea application=
+    const existing = await applicationRepo.findOne({ where: { email, businessIdea } });
     if (existing) {
-      return res.status(400).json({ message: "An application with this email already exists" });
+      return res.status(400).json({ message: "You have already applied with this business idea" });
     }
-  
     // ✅ Create application aligned with entity fields
     const newApp = applicationRepo.create({
       first_name,
@@ -62,23 +63,23 @@ export class ApplicationsController {
       teamMembers: Array.isArray(teamMembers)
         ? teamMembers
         : teamMembers
-        ? [teamMembers]
-        : [],
+          ? [teamMembers]
+          : [],
       status: "pending",
     });
-  
+
     await applicationRepo.save(newApp);
-  
+
     res.status(201).json({
       message: "Application submitted successfully",
       application: newApp,
     });
   });
-  
+
   listApplications = asyncHandler(async (_req: UserRequest, res: Response) => {
     const apps = await applicationRepo.find({
       relations: ["user", "startup"],
-      order: { createdAt: "DESC" }, 
+      order: { createdAt: "DESC" },
     });
     res.status(200).json(apps);
   });
@@ -119,11 +120,17 @@ export class ApplicationsController {
     // Try to find user
     let user = await userRepo.findOne({ where: { email: app.email } });
 
-    // If user not found, create one
+    // If user not found, create one and add a role of mentee
     if (!user) {
       const emailPrefix = app.email.split("@")[0];
       const generatedPassword = `${emailPrefix}@Desic123`;
       const hashedPassword = await bcrypt.hash(generatedPassword, 10);
+
+      // ✅ Find the mentee role
+      const menteeRole = await roleRepo.findOne({ where: { name: ILike("mentee") } });
+      if (!menteeRole) {
+        return res.status(400).json({ message: "Mentee role not found in the system" });
+      }
 
       // ✅ Fix: avoid null assignment to optional properties
       const newUser = userRepo.create({
@@ -131,6 +138,7 @@ export class ApplicationsController {
         email: app.email,
         password: hashedPassword,
         regNumber: app.regNo || undefined, // undefined instead of null
+        role: menteeRole, // Assign mentee role
         // add phone if exists
         ...(app.phone ? { currentProject: app.phone } : {}),
       });
@@ -157,10 +165,10 @@ export class ApplicationsController {
       teamMembers: Array.isArray(app.teamMembers)
         ? app.teamMembers
         : app.teamMembers
-        ? [app.teamMembers]
-        : [],
-      currentStage:stage,
-      currentSubStage:subStage,
+          ? [app.teamMembers]
+          : [],
+      currentStage: stage,
+      currentSubStage: subStage,
       status: "active",
       application: app,
     });

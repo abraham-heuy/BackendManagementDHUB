@@ -41,7 +41,7 @@ export const AppDataSource = new DataSource({
         
     ],
     migrations: ["src/migrations/*.ts"],
-    synchronize: false,
+    synchronize: true,
     logging: false,
 })
 
