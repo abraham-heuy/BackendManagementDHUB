@@ -35,18 +35,18 @@ export class ApplicationsController {
       revenueModel,
       teamMembers,
     } = req.body;
-  
+
     // ✅ Validate required fields
     if (!first_name || !last_name || !email || !businessIdea || !problemStatement || !solution) {
       return res.status(400).json({ message: "Missing required fields" });
     }
-  
+
     // ✅ Check if user already applied
     const existing = await applicationRepo.findOne({ where: { email } });
     if (existing) {
       return res.status(400).json({ message: "You have already applied with this business idea" });
     }
-  
+
     // ✅ Create application aligned with entity fields
     const newApp = applicationRepo.create({
       first_name,
@@ -79,7 +79,7 @@ export class ApplicationsController {
   listApplications = asyncHandler(async (_req: UserRequest, res: Response) => {
     const apps = await applicationRepo.find({
       relations: ["user", "startup"],
-      order: { createdAt: "DESC" }, 
+      order: { createdAt: "DESC" },
     });
 
     res.status(200).json(apps);
@@ -99,16 +99,16 @@ export class ApplicationsController {
   });
   approveApplication = asyncHandler(async (req: UserRequest, res: Response) => {
     const { applicationId } = req.params;
-  
+
     const app = await applicationRepo.findOne({
       where: { application_id: applicationId },
       relations: ["user"],
     });
-  
+
     if (!app) return res.status(404).json({ message: "Application not found" });
     if (app.status === "approved")
       return res.status(400).json({ message: "Application already approved" });
-  
+
     app.status = "approved";
     await applicationRepo.save(app);
 
@@ -122,12 +122,11 @@ export class ApplicationsController {
 
     // If user not found, create one
     if (!user) {
-      const roleRepo = AppDataSource.getRepository("Role");
-      const menteeRole = await roleRepo.findOne({ where: { name: "mentee" } });
+      const menteeRole = await roleRepo.findOne({ where: { name: ILike("mentee") } });
       if (!menteeRole) {
         return res.status(500).json({ message: "Default role 'mentee' not found in system" });
       }
-  
+
       const emailPrefix = app.email.split("@")[0];
       const generatedPassword = `${emailPrefix}@Desic123`;
       const hashedPassword = await bcrypt.hash(generatedPassword, 10);
@@ -138,27 +137,28 @@ export class ApplicationsController {
         email: app.email,
         password: hashedPassword,
         regNumber: app.regNo || undefined, // undefined instead of null
+        role: menteeRole, // Assign mentee role
         // add phone if exists
         ...(app.phone ? { currentProject: app.phone } : {}),
       });
-  
-      user = await userRepo.save(user);
+
+      user = await userRepo.save(newUser);
       (user as any).generatedPassword = generatedPassword;
     }
-  
+
     app.user = user;
     await applicationRepo.save(app);
-  
+
     // --- Get first stage and substage dynamically ---
     const stage = await stageRepo.findOne({
       where: { order: 1 },
       relations: ["substages"],
     });
-  
+
     if (!stage) return res.status(400).json({ message: "No stage found with order = 1" });
-  
+
     const subStage = stage.substages?.find((s) => s.order === 1) || null;
-  
+
     // --- Create startup linked to mentee ---
     const startup = startupRepo.create({
       title: app.businessIdea?.substring(0, 60) || "New Startup",
@@ -167,20 +167,20 @@ export class ApplicationsController {
       teamMembers: Array.isArray(app.teamMembers)
         ? app.teamMembers
         : app.teamMembers
-        ? [app.teamMembers]
-        : [],
-      currentStage:stage,
-      currentSubStage:subStage,
+          ? [app.teamMembers]
+          : [],
+      currentStage: stage,
+      currentSubStage: subStage,
       status: "active",
       application: app,
     });
-  
+
     await startupRepo.save(startup);
-  
+
     // --- Link startup ID to user's current project ---
     user.currentProject = startup.startup_id;
     await userRepo.save(user);
-  
+
     res.status(201).json({
       message: "Application approved. Mentee user and startup created successfully.",
       user: {
@@ -199,9 +199,9 @@ export class ApplicationsController {
       },
     });
   });
-  
-  
-  
+
+
+
 
   rejectApplication = asyncHandler(async (req: UserRequest, res: Response) => {
     const { applicationId } = req.params;
